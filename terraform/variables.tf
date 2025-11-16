@@ -27,3 +27,23 @@ variable "create_nat_eip" {
   type    = bool
   default = true
 }
+
+variable "alb_sg_name" {
+  type    = string
+  default = "alb-security-group"
+}
+
+variable "ecs_sg_name" {
+  type    = string
+  default = "ecs-fargate-security-group"
+}
+
+variable "allow_http_from_cidr" {
+  type    = string
+  default = "0.0.0.0/0"
+}
+
+variable "allow_https_from_cidr" {
+  type    = string
+  default = "0.0.0.0/0"
+}
