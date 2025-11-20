@@ -1,20 +1,23 @@
-variable "alb_sg_name" {
-  type    = string
-  default = "alb-security-group"
-}
+variable "vpc_id" { type = string }
 
-variable "vpc_id" {
-  type = string
-}
+variable "alb_sg_name" { type = string }
 
-variable "allow_http_from_cidr" {
-  type        = string
-  description = "CIDR block allowed to access HTTP"
-  default     = "0.0.0.0/0"
-}
+variable "ecs_sg_name" { type = string }
 
-variable "allow_https_from_cidr" {
-  type        = string
-  description = "CIDR block allowed to access HTTPS"
-  default     = "0.0.0.0/0"
-}
+variable "http_port" { type = number }
+
+variable "https_port" { type = number }
+
+variable "app_port" { type = number }
+
+variable "protocol" { type = string }
+
+variable "http_cidr" { type = string }
+
+variable "https_cidr" { type = string }
+
+variable "alb_egress_cidr" { type = string }
+
+variable "ecs_egress_cidr" { type = string }
+
+variable "egress_protocol" { type = string }
