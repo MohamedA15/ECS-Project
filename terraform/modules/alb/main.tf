@@ -1,3 +1,4 @@
+# Load Balancer
 resource "aws_lb" "alb" {
   name               = var.alb_name
   load_balancer_type = "application"
@@ -7,6 +8,7 @@ resource "aws_lb" "alb" {
   enable_deletion_protection = false
 }
 
+# Target Group
 resource "aws_lb_target_group" "tg" {
   name        = var.tg_name
   port        = var.tg_port
@@ -24,12 +26,14 @@ resource "aws_lb_target_group" "tg" {
   }
 }
 
+# HTTPS Listener
 resource "aws_lb_listener" "https_listener" {
   load_balancer_arn = aws_lb.alb.arn
   port              = var.https_listener_port
   protocol          = "HTTPS"
   ssl_policy        = var.ssl_policy
-  certificate_arn   = var.acm_certificate_arn
+
+  certificate_arn = var.acm_certificate_arn
 
   default_action {
     type             = "forward"
