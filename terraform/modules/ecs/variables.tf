@@ -49,3 +49,14 @@ variable "target_group_arn" {
 variable "alb_listener_arn" {
   type = string
 }
+
+
+variable "nc_admin_email" {
+  type = string
+  sensitive = true
+}
+
+variable "nc_admin_password" {
+  type = string
+  sensitive = true
+}
