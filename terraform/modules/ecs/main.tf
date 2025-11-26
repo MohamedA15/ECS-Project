@@ -1,3 +1,4 @@
+# ECS Cluster
 resource "aws_ecs_cluster" "this" {
   name = var.cluster_name
 
@@ -7,8 +8,8 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
+# IAM ROLES
 
-# IAM Roles
 
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.cluster_name}-execution-role"
@@ -28,7 +29,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Task Role for ECS Tasks
+# Task role (permissions for container)
 resource "aws_iam_role" "ecs_task_role" {
   name = "${var.cluster_name}-task-role"
 
@@ -42,16 +43,13 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 }
 
-
-# CloudWatch Log Group
-
+# CloudWatch Logs
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/${var.container_name}"
   retention_in_days = 7
 }
 
-# Task Definition
-
+# ECS TASK DEFINITION
 resource "aws_ecs_task_definition" "this" {
   family                   = var.container_name
   network_mode             = "awsvpc"
@@ -64,14 +62,30 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([
     {
-      name  = var.container_name
-      image = var.ecr_image
+      name      = var.container_name
+      image     = var.ecr_image
       essential = true
 
       portMappings = [{
         containerPort = var.container_port
         protocol      = "tcp"
       }]
+
+   
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}/health || exit 1"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 10
+      }
+
+      environment = [
+        {
+          name  = "FORCE_DEPLOY"
+          value = timestamp()
+        }
+      ]
 
       logConfiguration = {
         logDriver = "awslogs"
@@ -85,9 +99,7 @@ resource "aws_ecs_task_definition" "this" {
   ])
 }
 
-
-# ECS Service
-
+# ECS SERVICE
 resource "aws_ecs_service" "this" {
   name            = var.service_name
   cluster         = aws_ecs_cluster.this.id
@@ -96,15 +108,15 @@ resource "aws_ecs_service" "this" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = var.private_subnets
-    security_groups = [var.ecs_sg_id]
+    subnets          = var.private_subnets
+    security_groups  = [var.ecs_sg_id]
     assign_public_ip = false
   }
 
   load_balancer {
     target_group_arn = var.target_group_arn
-    container_name    = var.container_name
-    container_port    = var.container_port
+    container_name   = var.container_name
+    container_port   = var.container_port
   }
 
   depends_on = [
