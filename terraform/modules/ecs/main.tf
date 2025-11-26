@@ -9,8 +9,6 @@ resource "aws_ecs_cluster" "this" {
 }
 
 # IAM ROLES
-
-
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.cluster_name}-execution-role"
 
@@ -71,7 +69,6 @@ resource "aws_ecs_task_definition" "this" {
         protocol      = "tcp"
       }]
 
-   
       healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}/health || exit 1"]
         interval    = 30
@@ -81,10 +78,10 @@ resource "aws_ecs_task_definition" "this" {
       }
 
       environment = [
-        {
-          name  = "FORCE_DEPLOY"
-          value = timestamp()
-        }
+        { name = "NC_DB",             value = "sqlite;;path=/usr/app/data/nc.db" },
+        { name = "NC_ADMIN_EMAIL",    value = var.nc_admin_email },
+        { name = "NC_ADMIN_PASSWORD", value = var.nc_admin_password },
+        { name = "FORCE_DEPLOY",      value = timestamp() }
       ]
 
       logConfiguration = {
