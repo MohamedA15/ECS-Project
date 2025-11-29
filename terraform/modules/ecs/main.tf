@@ -1,4 +1,6 @@
-# ECS Cluster
+
+# ECS CLUSTER 
+
 resource "aws_ecs_cluster" "this" {
   name = var.cluster_name
 
@@ -8,15 +10,17 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
-# IAM ROLES
+
+# IAM ROLE 
+
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.cluster_name}-execution-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
+      Effect = "Allow",
+      Principal = { Service = "ecs-tasks.amazonaws.com" },
       Action = "sts:AssumeRole"
     }]
   })
@@ -27,27 +31,30 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Task role (permissions for container)
 resource "aws_iam_role" "ecs_task_role" {
   name = "${var.cluster_name}-task-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
+      Effect = "Allow",
+      Principal = { Service = "ecs-tasks.amazonaws.com" },
       Action = "sts:AssumeRole"
     }]
   })
 }
 
-# CloudWatch Logs
+
+# LOGS GROUP   
+
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/${var.container_name}"
   retention_in_days = 7
 }
 
-# ECS TASK DEFINITION
+
+# TASK DEFINITION  
+
 resource "aws_ecs_task_definition" "this" {
   family                   = var.container_name
   network_mode             = "awsvpc"
@@ -66,22 +73,24 @@ resource "aws_ecs_task_definition" "this" {
 
       portMappings = [{
         containerPort = var.container_port
+        hostPort      = var.container_port
         protocol      = "tcp"
       }]
 
-      healthCheck = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}/health || exit 1"]
-        interval    = 30
-        timeout     = 5
-        retries     = 3
-        startPeriod = 10
-      }
+      
 
       environment = [
-        { name = "NC_DB",             value = "sqlite;;path=/usr/app/data/nc.db" },
-        { name = "NC_ADMIN_EMAIL",    value = var.nc_admin_email },
-        { name = "NC_ADMIN_PASSWORD", value = var.nc_admin_password },
-        { name = "FORCE_DEPLOY",      value = timestamp() }
+        { name = "SECRET_KEY",               value = var.outline_secret_key },
+        { name = "UTILS_SECRET",             value = var.outline_utils_secret },
+        { name = "DATABASE_URL",             value = var.database_url },
+        { name = "REDIS_URL",                value = var.redis_url },
+        { name = "FILE_STORAGE",             value = "s3" },
+        { name = "AWS_REGION",               value = var.aws_region },
+        { name = "AWS_S3_UPLOAD_BUCKET_URL", value = "https://${var.s3_bucket_name}.s3.${var.aws_region}.amazonaws.com" },
+        { name = "AWS_S3_UPLOAD_BUCKET_NAME", value = var.s3_bucket_name },
+        { name = "AWS_S3_FORCE_PATH_STYLE",   value = "true" },
+        { name = "URL",                       value = var.public_url },
+        { name = "FORCE_DEPLOY",              value = timestamp() }
       ]
 
       logConfiguration = {
@@ -96,7 +105,9 @@ resource "aws_ecs_task_definition" "this" {
   ])
 }
 
-# ECS SERVICE
+
+# ECS SERVICE  
+
 resource "aws_ecs_service" "this" {
   name            = var.service_name
   cluster         = aws_ecs_cluster.this.id
