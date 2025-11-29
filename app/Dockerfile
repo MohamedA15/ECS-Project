@@ -63,4 +63,4 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=5 \
 
 EXPOSE 3000
 
-CMD ["yarn", "start"]
+CMD ["yarn", "start"] 
