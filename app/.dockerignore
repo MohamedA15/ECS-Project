@@ -1,0 +1,26 @@
+# Git
+.git/
+.github/
+
+# Dev files
+docs/
+__mocks__/
+AGENTS.md
+Makefile
+README.md
+LICENSE
+docker-compose.yml
+i18next-parser.config.js
+lint-staged.config.mjs
+relativeci.config.js
+
+# Logs
+*.log
+
+# System junk
+.DS_Store
+
+# Ignore builds from host
+node_modules/
+dist/
+build/
