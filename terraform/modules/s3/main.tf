@@ -1,3 +1,4 @@
+# Create S3 bucket
 resource "aws_s3_bucket" "this" {
   bucket = var.bucket_name
 
@@ -8,6 +9,7 @@ resource "aws_s3_bucket" "this" {
   }
 }
 
+# Block public access
 resource "aws_s3_bucket_public_access_block" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -17,6 +19,7 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
+# Enable versioning
 resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -24,6 +27,8 @@ resource "aws_s3_bucket_versioning" "this" {
     status = "Enabled"
   }
 }
+
+# Enable SSE encryption
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket = aws_s3_bucket.this.id
@@ -34,6 +39,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
     }
   }
 }
+
 
 # Grant ECS task permission to use the bucket
 resource "aws_iam_policy" "s3_policy" {
@@ -60,7 +66,9 @@ resource "aws_iam_policy" "s3_policy" {
   })
 }
 
+# Attach policy to ECS role
 resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   role       = var.ecs_task_role_name
   policy_arn = aws_iam_policy.s3_policy.arn
 }
+
