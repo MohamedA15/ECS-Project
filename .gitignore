@@ -5,3 +5,7 @@
 *.tfstate
 *.tfstate.*
 .terraform/
+
+# Local variable files (contain secrets)
+*.tfvars
+*.tfvars.json
