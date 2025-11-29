@@ -16,4 +16,7 @@ variable "interval" { type = number }
 variable "https_listener_port" { type = number }
 variable "ssl_policy" { type = string }
 
-variable "acm_certificate_arn" { type = string }
+
+variable "acm_certificate_arn" {
+  type = string
+}
