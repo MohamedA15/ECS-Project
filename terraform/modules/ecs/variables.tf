@@ -50,13 +50,28 @@ variable "alb_listener_arn" {
   type = string
 }
 
-
-variable "nc_admin_email" {
+variable "outline_secret_key" {
   type = string
   sensitive = true
 }
 
-variable "nc_admin_password" {
+variable "outline_utils_secret" {
   type = string
   sensitive = true
+}
+
+variable "database_url" {
+  type = string
+}
+
+variable "redis_url" {
+  type = string
+}
+
+variable "s3_bucket_name" {
+  type = string
+}
+
+variable "public_url" {
+  type = string
 }
