@@ -37,24 +37,30 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Debug: show build context size (IMPORTANT)
+      - name: Show build context size
+        run: du -sh app/
+
+      # Export SHA for tagging
+      - name: Set commit SHA
+        id: vars
+        run: echo "sha=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Build Docker image (runtime stage only)
         run: |
-          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          echo "Building image with tag: ${{ steps.vars.outputs.sha }}"
           docker build \
             --platform linux/amd64 \
             --target runtime \
             -f app/Dockerfile \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$COMMIT_SHA \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.vars.outputs.sha }} \
             app/
 
       - name: Show Docker Image Size
-        run: |
-          docker images $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        run: docker images $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: Push to ECR
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$COMMIT_SHA
-
-          
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.vars.outputs.sha }}
