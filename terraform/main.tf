@@ -124,7 +124,7 @@ module "rds" {
 module "s3" {
   source = "./modules/s3"
 
-  bucket_name        = "outline-mo-storage"
+  bucket_name        = var.s3_bucket_name
   ecs_task_role_name = module.ecs.task_role_name
 }
 
