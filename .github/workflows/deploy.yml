@@ -41,6 +41,11 @@ jobs:
         run: |
           docker build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest app/
 
+      - name: Show Docker image size
+        run: |
+          echo "===== Docker Image Size ====="
+          docker images $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
       - name: Push to ECR
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
