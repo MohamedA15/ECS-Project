@@ -37,17 +37,17 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image 
+      - name: Build Docker image (correct context)
         run: |
           docker build \
             --platform linux/amd64 \
             -f app/Dockerfile \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
-            .
+            app/
 
       - name: Show Docker Image Size
         run: |
-          echo "===== Docker Image Size ====="
+          echo "Docker Image Size"
           docker images $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: Push to ECR
