@@ -98,8 +98,8 @@ variable "ecs_egress_cidr" {
 
 
 variable "alb_name" { type = string }
-variable "tg_name"  { type = string }
-variable "tg_port"  { type = number }
+variable "tg_name" { type = string }
+variable "tg_port" { type = number }
 
 variable "health_check_path" { type = string }
 variable "healthy_threshold" { type = number }
@@ -178,7 +178,7 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  type = string
+  type      = string
   sensitive = true
 }
 

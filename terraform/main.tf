@@ -19,18 +19,18 @@ module "security_groups" {
 
   vpc_id = module.vpc.vpc_id
 
-  alb_sg_name  = var.alb_sg_name
-  ecs_sg_name  = var.ecs_sg_name
+  alb_sg_name = var.alb_sg_name
+  ecs_sg_name = var.ecs_sg_name
 
-  http_port    = var.http_port
-  https_port   = var.https_port
-  app_port     = var.app_port  
+  http_port  = var.http_port
+  https_port = var.https_port
+  app_port   = var.app_port
 
   protocol        = var.protocol
   egress_protocol = var.egress_protocol
 
-  http_cidr       = var.http_cidr
-  https_cidr      = var.https_cidr
+  http_cidr  = var.http_cidr
+  https_cidr = var.https_cidr
 
   alb_egress_cidr = var.alb_egress_cidr
   ecs_egress_cidr = var.ecs_egress_cidr
@@ -60,14 +60,14 @@ module "alb" {
   tg_name  = var.tg_name
   tg_port  = var.tg_port
 
-  health_check_path      = var.health_check_path
-  healthy_threshold      = var.healthy_threshold
-  unhealthy_threshold    = var.unhealthy_threshold
-  timeout                = var.timeout
-  interval               = var.interval
+  health_check_path   = var.health_check_path
+  healthy_threshold   = var.healthy_threshold
+  unhealthy_threshold = var.unhealthy_threshold
+  timeout             = var.timeout
+  interval            = var.interval
 
-  https_listener_port    = var.https_listener_port
-  ssl_policy             = var.ssl_policy
+  https_listener_port = var.https_listener_port
+  ssl_policy          = var.ssl_policy
 
   acm_certificate_arn = module.acm.certificate_arn
 }
@@ -83,17 +83,17 @@ module "ecs" {
   outline_utils_secret = var.outline_utils_secret
 
   # ECS config
-  cluster_name    = var.cluster_name
-  service_name    = var.service_name
-  container_name  = var.container_name
-  container_port  = var.container_port
-  cpu             = var.container_cpu
-  memory          = var.container_memory
+  cluster_name   = var.cluster_name
+  service_name   = var.service_name
+  container_name = var.container_name
+  container_port = var.container_port
+  cpu            = var.container_cpu
+  memory         = var.container_memory
 
   # Image
-  ecr_image       = var.ecr_image
-  desired_count   = var.ecs_desired_count
-  aws_region      = var.aws_region
+  ecr_image     = var.ecr_image
+  desired_count = var.ecs_desired_count
+  aws_region    = var.aws_region
 
   # Networking
   private_subnets = module.vpc.private_subnet_ids
@@ -104,10 +104,10 @@ module "ecs" {
   alb_listener_arn = module.alb.https_listener_arn
 
   # NEW REQUIRED VALUES
-  database_url = "postgresql://${var.db_username}:${var.db_password}@${module.rds.db_endpoint}:5432/outline"
-  redis_url       = "redis://${module.redis.redis_endpoint}:6379"
-  s3_bucket_name  = module.s3.bucket_name
-  public_url      = "https://${var.domain_name}"
+  database_url   = "postgresql://${var.db_username}:${var.db_password}@${module.rds.db_endpoint}:5432/outline"
+  redis_url      = "redis://${module.redis.redis_endpoint}:6379"
+  s3_bucket_name = module.s3.bucket_name
+  public_url     = "https://${var.domain_name}"
 }
 
 
@@ -124,7 +124,7 @@ module "rds" {
 module "s3" {
   source = "./modules/s3"
 
-  bucket_name        = "outline-mo-storage"  
+  bucket_name        = "outline-mo-storage"
   ecs_task_role_name = module.ecs.task_role_name
 }
 
