@@ -1,0 +1,46 @@
+name: Build & Push Outline Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type "yes" to build & push image'
+        required: true
+        default: 'no'
+
+env:
+  AWS_REGION: eu-west-2
+  ECR_REPOSITORY: outline
+  ECR_REGISTRY: 688372068827.dkr.ecr.eu-west-2.amazonaws.com
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Confirm
+        if: ${{ github.event.inputs.confirmation != 'yes' }}
+        run: |
+          echo "Build cancelled."
+          exit 1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest app/
+
+      - name: Push to ECR
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
