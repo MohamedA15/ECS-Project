@@ -1,4 +1,3 @@
-#VPC and Subnets
 variable "vpc_cidr" {
   type    = string
   default = "10.0.0.0/16"
@@ -38,18 +37,6 @@ variable "ecs_sg_name" {
   type    = string
   default = "ecs-fargate-security-group"
 }
-
-variable "allow_http_from_cidr" {
-  type    = string
-  default = "0.0.0.0/0"
-}
-
-variable "allow_https_from_cidr" {
-  type    = string
-  default = "0.0.0.0/0"
-}
-
-# Security Groups
 
 variable "http_port" {
   type    = number
@@ -96,23 +83,49 @@ variable "ecs_egress_cidr" {
   default = "0.0.0.0/0"
 }
 
+variable "alb_name" {
+  type = string
+}
 
-variable "alb_name" { type = string }
-variable "tg_name" { type = string }
-variable "tg_port" { type = number }
+variable "tg_name" {
+  type = string
+}
 
-variable "health_check_path" { type = string }
-variable "healthy_threshold" { type = number }
-variable "unhealthy_threshold" { type = number }
-variable "timeout" { type = number }
-variable "interval" { type = number }
+variable "tg_port" {
+  type = number
+}
 
-variable "https_listener_port" { type = number }
-variable "ssl_policy" { type = string }
+variable "health_check_path" {
+  type = string
+}
 
-variable "domain_name" { type = string }
-variable "hosted_zone_id" { type = string }
+variable "healthy_threshold" {
+  type = number
+}
 
+variable "unhealthy_threshold" {
+  type = number
+}
+
+variable "timeout" {
+  type = number
+}
+
+variable "interval" {
+  type = number
+}
+
+variable "https_listener_port" {
+  type = number
+}
+
+variable "ssl_policy" {
+  type = string
+}
+
+variable "domain_name" {
+  type = string
+}
 
 variable "cluster_name" {
   type = string
@@ -150,27 +163,20 @@ variable "aws_region" {
   type = string
 }
 
-
-
 variable "cloudflare_api_token" {
-  type        = string
-  description = "API token for Cloudflare DNS updates"
+  type = string
 }
 
 variable "cloudflare_zone_id" {
-  type        = string
-  description = "Cloudflare Zone ID for DNS validation"
+  type = string
 }
 
-
 variable "outline_secret_key" {
-  type        = string
-  description = "Secret key for Outline"
+  type = string
 }
 
 variable "outline_utils_secret" {
-  type        = string
-  description = "Utils secret for Outline"
+  type = string
 }
 
 variable "db_username" {
