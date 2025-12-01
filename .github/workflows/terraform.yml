@@ -11,7 +11,6 @@ on:
         options:
           - staging
           - production
-
       action:
         description: "Choose Terraform action"
         required: true
@@ -21,12 +20,10 @@ on:
           - plan
           - apply
           - destroy
-
       confirm:
-        description: 'Type "DEPLOY" to confirm apply/destroy'
+        description: "Type DEPLOY to confirm apply/destroy"
         required: false
         type: string
-        
       auto_approve:
         description: "Auto-approve apply or destroy"
         required: false
@@ -43,11 +40,9 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
 
-     
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -55,47 +50,36 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-  
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.12.2
 
-   
-      - name: Create auto.tfvars from GitHub secret
+      - name: Create auto.tfvars
         working-directory: terraform
         run: |
-          echo "Writing TF_VARS secret into auto.tfvars..."
-          cat <<'EOF' > auto.tfvars
-          ${{ secrets.TF_VARS }}
-          EOF
+          echo "${{ secrets.TF_VARS }}" > auto.tfvars
+          cat auto.tfvars
 
-     
       - name: Terraform Init
         working-directory: terraform
         run: terraform init -input=false
 
       - name: Terraform Format
         working-directory: terraform
-        run: |
-          echo "Checking formatting for .tf files only..."
-          find . -name "*.tf" -exec terraform fmt -check {} \;
+        run: terraform fmt -check
 
-  
       - name: Terraform Validate
         working-directory: terraform
         run: terraform validate
 
-      
       - name: Install & Run TFLint
         working-directory: terraform
         run: |
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
           tflint --init
-          # do not fail pipeline for warnings
           tflint || true
 
-     
       - name: Run Checkov
         run: |
           pip install checkov
@@ -105,21 +89,18 @@ jobs:
         if: github.event.inputs.action != 'plan' && github.event.inputs.auto_approve != 'true'
         run: |
           if [[ "${{ github.event.inputs.confirm }}" != "DEPLOY" ]]; then
-            echo "ERROR: Must type DEPLOY to continue."
             exit 1
           fi
-
 
       - name: Terraform Plan
         working-directory: terraform
         run: |
           if [ "${{ github.event.inputs.action }}" = "destroy" ]; then
-            terraform plan -destroy -out=tfplan -input=false
+            terraform plan -destroy -var-file=auto.tfvars -out=tfplan -input=false
           else
-            terraform plan -out=tfplan -input=false
+            terraform plan -var-file=auto.tfvars -out=tfplan -input=false
           fi
 
-    
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
         working-directory: terraform
@@ -130,17 +111,15 @@ jobs:
             terraform apply tfplan
           fi
 
-  
       - name: Terraform Destroy
         if: github.event.inputs.action == 'destroy'
         working-directory: terraform
         run: |
           if [ "${{ github.event.inputs.auto_approve }}" = "true" ]; then
-            terraform destroy -auto-approve
+            terraform destroy -auto-approve -var-file=auto.tfvars
           else
-            terraform destroy
+            terraform destroy -var-file=auto.tfvars
           fi
-
 
       - name: Output ALB DNS
         if: github.event.inputs.action == 'apply'
