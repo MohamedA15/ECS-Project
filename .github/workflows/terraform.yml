@@ -58,8 +58,10 @@ jobs:
       - name: Create auto.tfvars
         working-directory: terraform
         run: |
-          printf "%s" "${{ secrets.TF_VARS }}" > auto.tfvars
+          echo "${{ secrets.TF_VARS }}" > auto.tfvars
+          echo "=== auto.tfvars contents ==="
           cat auto.tfvars
+          echo "=== End ==="
 
       - name: Terraform Init
         working-directory: terraform
