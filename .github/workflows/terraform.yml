@@ -57,11 +57,7 @@ jobs:
 
       - name: Create auto.tfvars
         working-directory: terraform
-        run: |
-          echo "${{ secrets.TF_VARS }}" | base64 --decode > auto.tfvars
-          echo "=== auto.tfvars contents ==="
-          cat auto.tfvars
-          echo "=== End ==="
+        run: echo "${{ secrets.TF_VARS }}" | base64 --decode > auto.tfvars
 
       - name: Terraform Init
         working-directory: terraform
