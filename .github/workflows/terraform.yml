@@ -55,14 +55,13 @@ jobs:
         with:
           terraform_version: 1.12.2
 
-      - name: Create dev.tfvars from secret
+      - name: Create auto.tfvars from secret
         working-directory: terraform
         run: |
-          echo "Writing TF_VARS secret into dev.tfvars"
-          cat <<'EOF' > dev.tfvars
+          echo "Writing TF_VARS secret into auto.tfvars"
+          cat <<'EOF' > auto.tfvars
           ${{ secrets.TF_VARS }}
           EOF
-          echo "dev.tfvars created"
 
       - name: Terraform Init
         working-directory: terraform
@@ -81,7 +80,7 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
           tflint --init
-          tflint || true   # Do not fail pipeline for warnings
+          tflint || true
 
       - name: Run Checkov
         run: |
@@ -100,9 +99,9 @@ jobs:
         working-directory: terraform
         run: |
           if [ "${{ github.event.inputs.action }}" = "destroy" ]; then
-            terraform plan -destroy -var-file=dev.tfvars -out=tfplan -input=false
+            terraform plan -destroy -out=tfplan -input=false
           else
-            terraform plan -var-file=dev.tfvars -out=tfplan -input=false
+            terraform plan -out=tfplan -input=false
           fi
 
       - name: Terraform Apply
@@ -120,14 +119,12 @@ jobs:
         working-directory: terraform
         run: |
           if [ "${{ github.event.inputs.auto_approve }}" = "true" ]; then
-            terraform destroy -auto-approve -var-file=dev.tfvars
+            terraform destroy -auto-approve
           else
-            terraform destroy -var-file=dev.tfvars
+            terraform destroy
           fi
 
       - name: Output ALB DNS
         if: github.event.inputs.action == 'apply'
         working-directory: terraform
         run: terraform output -raw alb_dns_name || true
-
-        
