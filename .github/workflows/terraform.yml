@@ -65,7 +65,7 @@ jobs:
 
       - name: Terraform Format
         working-directory: terraform
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive *.tf
 
       - name: Terraform Validate
         working-directory: terraform
@@ -123,3 +123,4 @@ jobs:
         if: github.event.inputs.action == 'apply'
         working-directory: terraform
         run: terraform output -raw alb_dns_name || true
+        
