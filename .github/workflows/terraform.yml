@@ -1,6 +1,11 @@
 name: Terraform Deploy
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
   workflow_dispatch:
     inputs:
       environment:
@@ -11,21 +16,8 @@ on:
         options:
           - staging
           - production
-      action:
-        description: "Choose Terraform action"
-        required: true
-        default: "plan"
-        type: choice
-        options:
-          - plan
-          - apply
-          - destroy
-      confirm:
-        description: "Type DEPLOY to confirm apply/destroy"
-        required: false
-        type: string
       auto_approve:
-        description: "Auto-approve apply or destroy"
+        description: "Auto-approve apply"
         required: false
         default: false
         type: boolean
@@ -36,8 +28,8 @@ env:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    environment: ${{ github.event.inputs.environment }}
+    timeout-minutes: 45
+    environment: ${{ github.event.inputs.environment || 'staging' }}
 
     steps:
       - name: Checkout Code
@@ -83,44 +75,19 @@ jobs:
           pip install checkov
           checkov -d terraform/ --framework terraform --compact --hard-fail-on CRITICAL
 
-      - name: Require Confirmation for Apply/Destroy
-        if: github.event.inputs.action != 'plan' && github.event.inputs.auto_approve != 'true'
-        run: |
-          if [[ "${{ github.event.inputs.confirm }}" != "DEPLOY" ]]; then
-            exit 1
-          fi
-
       - name: Terraform Plan
         working-directory: terraform
-        run: |
-          if [ "${{ github.event.inputs.action }}" = "destroy" ]; then
-            terraform plan -destroy -var-file=auto.tfvars -out=tfplan -input=false
-          else
-            terraform plan -var-file=auto.tfvars -out=tfplan -input=false
-          fi
+        run: terraform plan -var-file=auto.tfvars -out=tfplan -input=false
 
       - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
         working-directory: terraform
         run: |
-          if [ "${{ github.event.inputs.auto_approve }}" = "true" ]; then
+          if [ "${{ github.event.inputs.auto_approve }}" = "true" ] || github.event_name == 'push'; then
             terraform apply -auto-approve tfplan
           else
             terraform apply tfplan
           fi
 
-      - name: Terraform Destroy
-        if: github.event.inputs.action == 'destroy'
-        working-directory: terraform
-        run: |
-          if [ "${{ github.event.inputs.auto_approve }}" = "true" ]; then
-            terraform destroy -auto-approve -var-file=auto.tfvars
-          else
-            terraform destroy -var-file=auto.tfvars
-          fi
-
       - name: Output ALB DNS
-        if: github.event.inputs.action == 'apply'
         working-directory: terraform
         run: terraform output -raw alb_dns_name || true
-        
