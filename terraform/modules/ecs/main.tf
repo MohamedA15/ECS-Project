@@ -11,7 +11,7 @@ resource "aws_ecs_cluster" "this" {
 }
 
 
-# IAM ROLE 
+# IAM ROLES
 
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.cluster_name}-execution-role"
