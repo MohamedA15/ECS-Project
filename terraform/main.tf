@@ -103,7 +103,7 @@ module "ecs" {
   target_group_arn = module.alb.target_group_arn
   alb_listener_arn = module.alb.https_listener_arn
 
-  # NEW REQUIRED VALUES
+
   database_url   = "postgresql://${var.db_username}:${var.db_password}@${module.rds.db_endpoint}:5432/outline"
   redis_url      = "redis://${module.redis.redis_endpoint}:6379"
   s3_bucket_name = module.s3.bucket_name
