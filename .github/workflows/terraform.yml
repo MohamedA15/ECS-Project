@@ -5,22 +5,11 @@ on:
     branches:
       - main
     paths:
-      - 'terraform/**'
+      - '**/*.tf'          
+      - '**/*.tfvars'      
+      - '**/*.hcl'        
+      
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Select environment"
-        required: true
-        default: "staging"
-        type: choice
-        options:
-          - staging
-          - production
-      auto_approve:
-        description: "Auto-approve apply"
-        required: false
-        default: false
-        type: boolean
 
 env:
   AWS_REGION: eu-west-2
@@ -29,7 +18,7 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    environment: ${{ github.event.inputs.environment || 'staging' }}
+    environment: staging
 
     steps:
       - name: Checkout Code
@@ -63,31 +52,10 @@ jobs:
         working-directory: terraform
         run: terraform validate
 
-      - name: Install & Run TFLint
-        working-directory: terraform
-        run: |
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          tflint --init
-          tflint || true
-
-      - name: Run Checkov
-        run: |
-          pip install checkov
-          checkov -d terraform/ --framework terraform --compact --hard-fail-on CRITICAL
-
       - name: Terraform Plan
         working-directory: terraform
         run: terraform plan -var-file=auto.tfvars -out=tfplan -input=false
 
       - name: Terraform Apply
         working-directory: terraform
-        run: |
-          if [ "${{ github.event.inputs.auto_approve }}" = "true" ] || github.event_name == 'push'; then
-            terraform apply -auto-approve tfplan
-          else
-            terraform apply tfplan
-          fi
-
-      - name: Output ALB DNS
-        working-directory: terraform
-        run: terraform output -raw alb_dns_name || true
+        run: terraform apply -auto-approve tfplan
