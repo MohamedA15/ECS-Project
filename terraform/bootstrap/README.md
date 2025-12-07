@@ -14,14 +14,17 @@ Configured for **eu-west-2**
 ##  Quick Start
 
 ### 1. Configure `terraform.tfvars`
+```
 region = "eu-west-2"
 state_bucket_name = "outline-bootstrap-bucket-mo"
 lock_table_name = "outline-bootstrap-locks"
 create_ecr = true
 ecr_repo_name = "outline"
 
+```
 
 ##  Module Structure
+```
 Bootstrap (Local State)
     │
     ├─► S3 Bucket (State Storage)
@@ -30,12 +33,15 @@ Bootstrap (Local State)
     │   ├─► Public Access Blocked
     │   └─► Lifecycle Rules
     │
+    ├─► S3 Bucket (Logs)
+    │   └─► Access Logs
+    │
     ├─► DynamoDB Table (State Locking)
     │   ├─► Pay-per-request Billing
     │   ├─► LockID as primary key
     │   └─► Tags for management
     │
-    └─► ECR Repository (Container Images)
+     └─► ECR Repository (Container Images)
         ├─► Private registry
         ├─► Image scanning on push
         └─► Mutable image tags
@@ -43,8 +49,8 @@ Bootstrap (Local State)
 Main Infrastructure (Remote State)
     │
     └─► Uses Bootstrap Resources ─► ECS, VPC, etc.
-
 ```
+
 
 ```bash
 terraform plan
@@ -56,12 +62,12 @@ terraform apply
 AFTER BOOTSTRAP, GO TO YOUR MAIN TERRAFORM FOLDER AND:
 
 Open provider.tf
-Add the backend config block (like above)
-Run terraform init to migrate to remote state
-It will ask to copy existing state to S3 - say YES
-Then deploy main infrastructure: terraform apply
+- Add the backend config block (like above)
+- Run terraform init to migrate to remote state
+- It will ask to copy existing state to S3 - say YES
+- Then deploy main infrastructure: terraform apply
 
-## ⚠️ Important
+##  Important
 - Bucket names must be globally unique
 - Never run this module again after initial setup
 - Destroying this will delete all Terraform state
