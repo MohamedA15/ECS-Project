@@ -1,89 +1,67 @@
-This module prepares the AWS backend infrastructure required for Terraform before deploying the main environment.
-It creates the remote state bucket, state lock table, and an optional ECR repository used for application container images.
+# Terraform Backend Bootstrap Module 
 
-This module is run once only and then left in place.
+##  Purpose
+Creates AWS backend infrastructure for Terraform state management. Run this **once only** before deploying main infrastructure.
 
-📌 Purpose
- 
-Terraform cannot safely manage infrastructure without a remote backend.
-This module provisions the backend resources so that the main Terraform configuration can:
-Store state remotely in S3
-Prevent concurrent runs using DynamoDB locking
-Store Docker images in ECR
-These resources form the foundation of all future Terraform deployments.
+##  Resources Created
+- **S3 Bucket** – Versioned, encrypted state storage
+- **DynamoDB Table** – State locking to prevent concurrent operations  
+- **ECR Repository** – Private container registry
 
-Resources Created
-1️⃣ S3 Bucket – Terraform State
-Used to store the terraform.tfstate file.
-The bucket is:
-Versioned
-Encrypted (AES-256)
-Blocked from public access
-2️⃣ DynamoDB Table – State Locking
-Prevents multiple Terraform runs editing the state at the same time.
-3️⃣ ECR Repository (Optional)
-Creates a private container registry used for storing Docker images.
-You only enable this if you need a dedicated ECR for your application.
+##  Region
+Configured for **eu-west-2**
 
-Region
-This module is configured for:
-eu-west-2
+##  Quick Start
 
-When to Use This Module
-You run this module:
-Once at the start of the project, to bootstrap the backend
-Any time you want a fresh backend for a new environment.
-After it has been applied you do not run it again unless intentionally recreating the backend.
-Your main Terraform project will reference the resources created here.
-
-Usage Instructions
-1️⃣ Update terraform.tfvars
-
-region            = "eu-west-2"
+### 1. Configure `terraform.tfvars`
+region = "eu-west-2"
 state_bucket_name = "outline-bootstrap-bucket-mo"
-lock_table_name   = "outline-bootstrap-locks"
-create_ecr        = true
-ecr_repo_name     = "outline"
+lock_table_name = "outline-bootstrap-locks"
+create_ecr = true
+ecr_repo_name = "outline"
 
 
-2️⃣ Initialise and Apply
+##  Module Structure
+Bootstrap (Local State)
+    │
+    ├─► S3 Bucket (State Storage)
+    │   ├─► Versioning Enabled
+    │   ├─► Encryption Enabled
+    │   ├─► Public Access Blocked
+    │   └─► Lifecycle Rules
+    │
+    ├─► DynamoDB Table (State Locking)
+    │   ├─► Pay-per-request Billing
+    │   ├─► LockID as primary key
+    │   └─► Tags for management
+    │
+    └─► ECR Repository (Container Images)
+        ├─► Private registry
+        ├─► Image scanning on push
+        └─► Mutable image tags
 
-terraform init
+Main Infrastructure (Remote State)
+    │
+    └─► Uses Bootstrap Resources ─► ECS, VPC, etc.
+
+```
+
+```bash
 terraform plan
 terraform apply
+```
 
 
-Backend Configuration Output
-After applying, the module generates a ready-to-use backend snippet:
+##  Next Steps
+AFTER BOOTSTRAP, GO TO YOUR MAIN TERRAFORM FOLDER AND:
 
-terraform {
-  backend "s3" {
-    bucket         = "outline-bootstrap-bucket-mo"
-    key            = "state/outline/terraform.tfstate"
-    region         = "eu-west-2"
-    dynamodb_table = "outline-bootstrap-locks"
-    encrypt        = true
-  }
-}
-Copy this into your main Terraform project (root main.tf) to enable remote state.
+Open provider.tf
+Add the backend config block (like above)
+Run terraform init to migrate to remote state
+It will ask to copy existing state to S3 - say YES
+Then deploy main infrastructure: terraform apply
 
-
-📁 Folder Structure
-bootstrap/
-  main.tf
-  variables.tf
-  outputs.tf
-  terraform.tfvars
-  README.md  
-  
-Summary
-
-This module:
-Creates and configures the Terraform backend
-Ensures safe, remote, versioned state storage
-Enables state locking
-Optionally provisions an ECR repository
-Is used once at the beginning of the project
-After bootstrapping, the main infrastructure can be deployed using this backend reliably.
-
-
+## ⚠️ Important
+- Bucket names must be globally unique
+- Never run this module again after initial setup
+- Destroying this will delete all Terraform state
