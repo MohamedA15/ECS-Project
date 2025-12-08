@@ -12,10 +12,15 @@
 
   This project deploys **Outline**, an open-source collaborative knowledge base platform, on **AWS ECS Fargate** using **Terraform**.  
 
-- Containerized deployment of the Outline knowledge base using Docker Serverless execution on AWS ECS Fargate
+- Containerised deployment of the Outline knowledge base using Docker Serverless execution on AWS ECS Fargate
 - Secure, private infrastructure with VPC, private subnets, and isolated ECS tasks
 - Public-facing Application Load Balancer (ALB) handling HTTPS and routing
 - Persistent storage via Amazon RDS (PostgreSQL) and caching via Redis
-- Infrastructure-as-code using modular Terraform (VPC, ECS, ALB, RDS, Redis, ACM, IAM, SGs, ECR)
+- Infrastructure as code using modular Terraform (VPC, ECS, ALB, RDS, Redis, ACM, SG)
 - Automated CI/CD pipeline using GitHub Actions for Docker builds and Terraform deployment
 - Domain, DNS, and security protection managed through Cloudflare
+
+## Architecture
+<p align="center">
+  <img src="images/architecture-diagram.png" alt="Architecture Diagram" width="650">
+</p>
