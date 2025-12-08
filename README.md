@@ -30,7 +30,7 @@ Architecture Summary
 
 - Users access the app through Cloudflare, which provides DNS, CDN, and security.
 - Traffic flows to an Application Load Balancer (ALB) for HTTPS routing.
-- - ECS Fargate runs the Outline application inside private subnets.
+- ECS Fargate runs the Outline application inside private subnets.
 - Amazon ECR stores Docker images deployed by GitHub Actions.
 - RDS PostgreSQL provides persistent database storage.
 - Redis (ElastiCache) handles caching and sessions.
