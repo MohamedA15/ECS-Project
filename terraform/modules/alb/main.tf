@@ -40,3 +40,4 @@ resource "aws_lb_listener" "https_listener" {
     target_group_arn = aws_lb_target_group.tg.arn
   }
 }
+
