@@ -51,12 +51,12 @@ variable "alb_listener_arn" {
 }
 
 variable "outline_secret_key" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "outline_utils_secret" {
-  type = string
+  type      = string
   sensitive = true
 }
 

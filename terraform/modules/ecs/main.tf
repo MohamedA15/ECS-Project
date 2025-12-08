@@ -19,9 +19,9 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow",
+      Effect    = "Allow",
       Principal = { Service = "ecs-tasks.amazonaws.com" },
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -37,9 +37,9 @@ resource "aws_iam_role" "ecs_task_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow",
+      Effect    = "Allow",
       Principal = { Service = "ecs-tasks.amazonaws.com" },
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -77,20 +77,20 @@ resource "aws_ecs_task_definition" "this" {
         protocol      = "tcp"
       }]
 
-      
+
 
       environment = [
-        { name = "SECRET_KEY",               value = var.outline_secret_key },
-        { name = "UTILS_SECRET",             value = var.outline_utils_secret },
-        { name = "DATABASE_URL",             value = var.database_url },
-        { name = "REDIS_URL",                value = var.redis_url },
-        { name = "FILE_STORAGE",             value = "s3" },
-        { name = "AWS_REGION",               value = var.aws_region },
+        { name = "SECRET_KEY", value = var.outline_secret_key },
+        { name = "UTILS_SECRET", value = var.outline_utils_secret },
+        { name = "DATABASE_URL", value = var.database_url },
+        { name = "REDIS_URL", value = var.redis_url },
+        { name = "FILE_STORAGE", value = "s3" },
+        { name = "AWS_REGION", value = var.aws_region },
         { name = "AWS_S3_UPLOAD_BUCKET_URL", value = "https://${var.s3_bucket_name}.s3.${var.aws_region}.amazonaws.com" },
         { name = "AWS_S3_UPLOAD_BUCKET_NAME", value = var.s3_bucket_name },
-        { name = "AWS_S3_FORCE_PATH_STYLE",   value = "true" },
-        { name = "URL",                       value = var.public_url },
-        { name = "FORCE_DEPLOY",              value = timestamp() }
+        { name = "AWS_S3_FORCE_PATH_STYLE", value = "true" },
+        { name = "URL", value = var.public_url },
+        { name = "FORCE_DEPLOY", value = timestamp() }
       ]
 
       logConfiguration = {
