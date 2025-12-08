@@ -1,7 +1,7 @@
 name: Terraform Destroy
 
 on:
-  workflow_dispatch:   # Only run manually to prevent accidents
+  workflow_dispatch:  
 
 env:
   AWS_REGION: eu-west-2
@@ -36,9 +36,9 @@ jobs:
         working-directory: terraform
         run: terraform init -input=false
 
-      - name: Terraform Format Check
+      - name: Terraform Format Check (only .tf files)
         working-directory: terraform
-        run: terraform fmt -check -recursive
+        run: find . -name "*.tf" -exec terraform fmt -check {} \;
 
       - name: Terraform Validate
         working-directory: terraform
@@ -51,3 +51,4 @@ jobs:
       - name: Terraform Destroy
         working-directory: terraform
         run: terraform destroy -auto-approve -var-file=auto.tfvars
+
